@@ -5,11 +5,15 @@ from ..repositories.mongo_db.suitability_answers.repository import SuitabilityRe
 from ..repositories.mongo_db.user.repository import UserRepository
 from ..transports.audit.transport import Audit
 
+# Standards
+from typing import Tuple
+
 
 class SuitabilityService:
 
-    async def create(self, unique_id: str):
-        answers, score, version = await self._get_suitability_answers()
+    @staticmethod
+    async def create(unique_id: str):
+        answers, score, version = await SuitabilityService._get_suitability_answers()
         suitability_model = SuitabilityModel(
             answers=answers,
             score=score,
@@ -19,11 +23,11 @@ class SuitabilityService:
         audit_template_msg = suitability_model.get_audit_suitability_template()
         await Audit.suitability_answer_log(audit_template_msg=audit_template_msg)
         suitability_doc = suitability_model.get_mongo_suitability_template()
-        await self._update_suitability_in_user_db(unique_id=unique_id, suitability_doc=suitability_doc)
+        await SuitabilityService._update_suitability_in_user_db(unique_id=unique_id, suitability_doc=suitability_doc)
         return True
 
     @staticmethod
-    async def _get_suitability_answers() -> tuple:
+    async def _get_suitability_answers() -> Tuple[list, float, int]:
         results = await SuitabilityRepository.find_most_recent_suitability_answers()
         suitability_answers = results[0]
         answers = suitability_answers.get("answers")
@@ -40,6 +44,5 @@ class SuitabilityService:
             user=user,
             suitability=suitability_doc
         )
-        if not user_updated:
+        if not user_updated.acknowledged:
             raise ErrorOnUpdateUser
-

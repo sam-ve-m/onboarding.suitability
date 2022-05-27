@@ -1,7 +1,7 @@
 class ErrorOnFindUser(Exception):
     msg = "User not exists, or unique_id invalid"
 
-+++
+
 class ErrorOnUpdateUser(Exception):
     msg = "User not exists, or unique_id invalid"
 

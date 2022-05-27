@@ -3,7 +3,7 @@ from datetime import datetime
 
 
 class SuitabilityModel:
-    def __init__(self, answers: list, score: int, unique_id: str, version: int):
+    def __init__(self, answers: list, score: float, unique_id: str, version: int):
         self.answers = answers
         self.score = score
         self.unique_id = unique_id

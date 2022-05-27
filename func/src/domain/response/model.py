@@ -1,5 +1,5 @@
 # Jormungandr
-from func.src.domain.enums.code import InternalCode
+from ...domain.enums.code import InternalCode
 
 # Standards
 from json import dumps
@@ -11,7 +11,7 @@ from flask import Response
 class ResponseModel:
     def __init__(self, success: bool, code: InternalCode, message: str = None, result: any = None):
         self.success = success
-        self.code = code.value
+        self.code = code
         self.message = message
         self.result = result
         self.response = self.to_dumps()

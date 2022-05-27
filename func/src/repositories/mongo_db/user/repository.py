@@ -1,6 +1,5 @@
 # Jormungandr - Onboarding
-# from ..base_repository.base import MongoDbBaseRepository
-from func.src.repositories.mongo_db.base_repository.base import MongoDbBaseRepository
+from ..base_repository.base import MongoDbBaseRepository
 
 # Third party
 from etria_logger import Gladsheim
@@ -27,19 +26,9 @@ class UserRepository(MongoDbBaseRepository):
     async def update_one_with_suitability_data(cls, user: dict, suitability):
         collection = await cls._get_collection()
         try:
-            await collection.update_one({user, suitability})
+            user_updated = await collection.update_one(user, {"$set": suitability})
+            return user_updated
         except Exception as ex:
             message = f'UserRepository::update_one_with_suitability_data::error on update user":{user}'
-            Gladsheim.error(error=ex, message=message)
-            raise ex
-
-    @classmethod
-    async def find_one_by_email(cls, email: str) -> dict:
-        collection = await cls._get_collection()
-        try:
-            user = await collection.find_one({'email': email}, {'_id': True})
-            return user
-        except Exception as ex:
-            message = f'UserRepository::find_one_by_email::with this query::"unique_id":{email}'
             Gladsheim.error(error=ex, message=message)
             raise ex

@@ -1,0 +1,23 @@
+apiVersion: fission.io/v1
+kind: HTTPTrigger
+metadata:
+  creationTimestamp: null
+  name: 18f73d26-e0ce-4c76-9073-4c2e8d7e590c
+  namespace: default
+spec:
+  createingress: false
+  functionref:
+    functionweights: null
+    name: suitability-fn
+    type: name
+  host: ""
+  ingressconfig:
+    annotations: null
+    host: '*'
+    path: /suitability
+    tls: ""
+  method: ""
+  methods:
+  - POST
+  prefix: ""
+  relativeurl: /suitability

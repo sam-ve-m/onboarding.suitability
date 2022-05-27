@@ -10,17 +10,9 @@ from http import HTTPStatus
 
 # Third party
 from etria_logger import Gladsheim
-from flask import Flask, request
-from asgiref.wsgi import WsgiToAsgi
-import asyncio
-from hypercorn.config import Config
-from hypercorn.asyncio import serve
-
-app = Flask(__name__)
-asgi_app = WsgiToAsgi(app)
+from flask import request
 
 
-@app.route('/create_suitability')
 async def create_suitability_profile():
     jwt = request.headers.get("x-thebes-answer")
     unique_id = await JwtService.decode_jwt_and_get_unique_id(jwt=jwt)
@@ -62,6 +54,3 @@ async def create_suitability_profile():
             success=False, code=InternalCode.INTERNAL_SERVER_ERROR, message=msg_error
         ).build_http_response(status=HTTPStatus.INTERNAL_SERVER_ERROR)
         return response
-
-
-asyncio.run(serve(asgi_app, Config()))
