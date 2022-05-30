@@ -48,3 +48,5 @@ Thumbs.db
 *.mov
 *.wmv
 
+
+func/requirements.example.txt
