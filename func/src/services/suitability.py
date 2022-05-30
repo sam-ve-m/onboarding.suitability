@@ -1,5 +1,5 @@
 # Jormungandr - Onboarding
-from ..domain.exceptions import ErrorOnFindUser, ErrorOnUpdateUser
+from ..domain.exceptions import ErrorOnFindUser, ErrorOnUpdateUser, NoSuitabilityAnswersFound, SuitabilityEmptyValues
 from ..domain.suitability.model import SuitabilityModel
 from ..repositories.mongo_db.suitability_answers.repository import SuitabilityRepository
 from ..repositories.mongo_db.user.repository import UserRepository
@@ -28,11 +28,14 @@ class SuitabilityService:
 
     @staticmethod
     async def _get_suitability_answers() -> Tuple[list, float, int]:
-        results = await SuitabilityRepository.find_most_recent_suitability_answers()
-        suitability_answers = results[0]
+        suitability_answers = await SuitabilityRepository.find_one_most_recent_suitability_answers()
+        if not suitability_answers:
+            raise NoSuitabilityAnswersFound
         answers = suitability_answers.get("answers")
         score = suitability_answers.get("score")
         version = suitability_answers.get("suitability_version")
+        if not all([answers, score, version]):
+            raise SuitabilityEmptyValues
         return answers, score, version
 
     @staticmethod
@@ -46,3 +49,4 @@ class SuitabilityService:
         )
         if not user_updated.acknowledged:
             raise ErrorOnUpdateUser
+

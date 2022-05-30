@@ -1,6 +1,7 @@
 --extra-index-url https://backend:_FILL_THIS_WITH_PASSWORD_@nexus.sigame.com.br/repository/pypi/simple
 asgiref==3.5.2
 boto3==1.21.21
+dnspython==2.2.1
 flask==2.1.2
 heimdall-client==2.2.0
 hypercorn==0.13.2

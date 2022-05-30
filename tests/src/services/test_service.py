@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import patch
-from .stubs import stub_unique_id, stub_suitability_doc, StubPymongoResults, stub_suitability_answers
-from func.src.domain.exceptions import ErrorOnSendAuditLog, ErrorOnUpdateUser, ErrorOnFindUser
+from .stubs import stub_unique_id, stub_suitability_doc, StubPymongoResults, stub_suitability_answers, stub_suitability_empty_answers
+from func.src.domain.exceptions import ErrorOnUpdateUser, ErrorOnFindUser, NoSuitabilityAnswersFound, SuitabilityEmptyValues
 from func.src.services.suitability import SuitabilityService
 
 
@@ -36,7 +36,7 @@ async def test_when_update_suitability_user_success_then_mock_was_called(mock_fi
     mock_update_one.assert_called_once_with(user=True, suitability=stub_suitability_doc)
 
 
-@patch('func.src.services.suitability.SuitabilityRepository.find_most_recent_suitability_answers',
+@patch('func.src.services.suitability.SuitabilityRepository.find_one_most_recent_suitability_answers',
        return_value=stub_suitability_answers)
 @pytest.mark.asyncio
 async def test_when_get_suitability_success_then_return_answer_score_and_version(mock_find_most_recent_suitability):
@@ -47,9 +47,25 @@ async def test_when_get_suitability_success_then_return_answer_score_and_version
     assert isinstance(version, int)
 
 
+@patch('func.src.services.suitability.SuitabilityRepository.find_one_most_recent_suitability_answers',
+       return_value=False)
+@pytest.mark.asyncio
+async def test_when_get_suitability_return_none_then_raises(mock_find_most_recent_suitability):
+    with pytest.raises(NoSuitabilityAnswersFound):
+        await SuitabilityService._get_suitability_answers()
+
+
+@patch('func.src.services.suitability.SuitabilityRepository.find_one_most_recent_suitability_answers',
+       return_value=stub_suitability_empty_answers)
+@pytest.mark.asyncio
+async def test_when_get_suitability_return_empty_values_then_raises(mock_find_most_recent_suitability):
+    with pytest.raises(SuitabilityEmptyValues):
+        await SuitabilityService._get_suitability_answers()
+
+
 @patch('func.src.services.suitability.SuitabilityService._update_suitability_in_user_db')
 @patch('func.src.services.suitability.Audit.suitability_answer_log')
-@patch('func.src.services.suitability.SuitabilityRepository.find_most_recent_suitability_answers',
+@patch('func.src.services.suitability.SuitabilityRepository.find_one_most_recent_suitability_answers',
        return_value=stub_suitability_answers)
 @pytest.mark.asyncio
 async def test_when_create_suitability_success_then_return_true(mock_answers, mock_audit, mock_insert_suitability):

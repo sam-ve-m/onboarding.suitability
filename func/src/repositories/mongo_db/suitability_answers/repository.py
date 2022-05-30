@@ -1,5 +1,7 @@
-from func.src.infrastructures.mongo_db.infrastructure import MongoDBInfrastructure
-from ..base_repository.base import MongoDbBaseRepository
+from motor.motor_asyncio import AsyncIOMotorClient
+
+# from ..base_repository.base import MongoDbBaseRepository
+from func.src.repositories.mongo_db.base_repository.base import MongoDbBaseRepository
 
 from etria_logger import Gladsheim
 from decouple import config
@@ -11,16 +13,13 @@ class SuitabilityRepository(MongoDbBaseRepository):
     collection = config("MONGODB_SUITABILITY_ANSWERS_COLLECTION")
 
     @classmethod
-    async def find_most_recent_suitability_answers(cls) -> list:
-        sort = ("_id", -1)
-        limit = 1
+    async def find_one_most_recent_suitability_answers(cls) -> dict:
         try:
             collection = await cls._get_collection()
-            cursor = collection.find()
-            cursor.sort(*sort)
-            suitability_answers = await cursor.to_list(limit)
-            return suitability_answers
+            result = await collection.find_one({"$query": {}, "$orderby": {"$natural": -1}})
+            return result
         except Exception as ex:
-            message = f"SuitabilityRepository::find_last_suitability_answer:: error on trying to get suitability answers"
+            message = f"SuitabilityRepository::find_last_suitability_answer:: error on trying to" \
+                      f" get suitability answers"
             Gladsheim.error(error=ex, message=message)
             raise ex
