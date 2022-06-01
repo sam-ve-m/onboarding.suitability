@@ -10,7 +10,7 @@ spec:
     container:
       name: ""
       resources: {}
-    image: nexus.sigame.com.br/python-builder-3.8:0.0.2
+    image: nexus.sigame.com.br/fission-builder-3.8:0.0.1
   imagepullsecret: ""
   keeparchive: false
   poolsize: 3
@@ -30,8 +30,8 @@ spec:
               value: "INFO"
             - name: ASGI_FRAMEWORK
               value: "HYPERCORN"
-            - name: PERSEPHONE_SCHEMA
-              value: "prospect_user_schema"
+            - name: PERSEPHONE_SUITABILITY_SCHEMA
+              value: "suitability_schema"
             - name: PERSEPHONE_TOPIC_USER
               value: "sphinx_persephone.user.crud"
             - name: PERSEPHONE_QUEUE_HOST
@@ -46,4 +46,18 @@ spec:
               value: "lionx"
             - name: MONGODB_USER_COLLECTION
               value: "users"
+            - name: HEIMDALL_FILE_BUCKET_NAME
+              value: "id_rsa"
+            - name: HEIMDALL_BUCKET_NAME_KEY
+              value: "auth-gateway"
+            - name: HEIMDALL_REDIS_HOST
+              value: "172.30.11.235"
+            - name: HEIMDALL_REDIS_PORT
+              value: "6379"
+            - name: HEIMDALL_REDIS_DB
+              value: "0"
+            - name: HEIMDALL_REDIS_USER
+              value: "bnd"
+            - name: HEIMDALL_REDIS_PASSWORD
+              value: "jkl321pqr"
   version: 2

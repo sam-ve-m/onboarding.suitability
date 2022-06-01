@@ -1,7 +1,6 @@
 from motor.motor_asyncio import AsyncIOMotorClient
 
-# from ..base_repository.base import MongoDbBaseRepository
-from func.src.repositories.mongo_db.base_repository.base import MongoDbBaseRepository
+from ..base_repository.base import MongoDbBaseRepository
 
 from etria_logger import Gladsheim
 from decouple import config
