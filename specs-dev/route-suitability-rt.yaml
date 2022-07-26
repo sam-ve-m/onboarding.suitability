@@ -2,7 +2,7 @@ apiVersion: fission.io/v1
 kind: HTTPTrigger
 metadata:
   creationTimestamp: null
-  name: 0441b36d-40a3-429d-8889-676f9549ccb5
+  name: suitability-rt
   namespace: default
 spec:
   createingress: false
@@ -14,10 +14,10 @@ spec:
   ingressconfig:
     annotations: null
     host: '*'
-    path: /suitability
+    path: /onboarding/set-suitability
     tls: ""
   method: ""
   methods:
   - POST
   prefix: ""
-  relativeurl: /suitability
+  relativeurl: /onboarding/set-suitability

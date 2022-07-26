@@ -15,9 +15,9 @@ from flask import request
 
 async def create_suitability_profile():
     jwt = request.headers.get("x-thebes-answer")
-    unique_id = await JwtService.decode_jwt_and_get_unique_id(jwt=jwt)
     msg_error = "Unexpected error occurred"
     try:
+        unique_id = await JwtService.decode_jwt_and_get_unique_id(jwt=jwt)
         success = await SuitabilityService.create(unique_id=unique_id)
         response = ResponseModel(
             success=success,
@@ -50,8 +50,8 @@ async def create_suitability_profile():
     except ErrorOnFindUser as ex:
         Gladsheim.error(error=ex, message=ex.msg)
         response = ResponseModel(
-            success=False, code=InternalCode.INTERNAL_SERVER_ERROR, message=msg_error
-        ).build_http_response(status=HTTPStatus.INTERNAL_SERVER_ERROR)
+            success=False, code=InternalCode.DATA_NOT_FOUND, message=msg_error
+        ).build_http_response(status=HTTPStatus.BAD_REQUEST)
         return response
 
     except ErrorOnUpdateUser as ex:
