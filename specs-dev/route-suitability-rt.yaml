@@ -14,10 +14,10 @@ spec:
   ingressconfig:
     annotations: null
     host: '*'
-    path: /onboarding/set-suitability
+    path: /onboarding/set_suitability
     tls: ""
   method: ""
   methods:
   - POST
   prefix: ""
-  relativeurl: /onboarding/set-suitability
+  relativeurl: /onboarding/set_suitability
