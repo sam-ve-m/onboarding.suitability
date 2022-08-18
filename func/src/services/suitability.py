@@ -27,12 +27,12 @@ class SuitabilityService:
         return True
 
     @staticmethod
-    async def create(unique_id: str) -> bool:
+    async def set_on_user(unique_id: str) -> bool:
         answers, score, version = await SuitabilityService._get_suitability_answers()
         suitability_model = SuitabilityModel(
             answers=answers, score=score, unique_id=unique_id, version=version
         )
-        await Audit.send_suitability_log(suitability_model=suitability_model)
+        await Audit.record_message_log(suitability_model=suitability_model)
         suitability_doc = await suitability_model.get_mongo_suitability_template()
         await SuitabilityService._update_suitability_in_user_db(
             unique_id=unique_id, suitability_doc=suitability_doc

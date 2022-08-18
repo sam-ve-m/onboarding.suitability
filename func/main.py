@@ -29,7 +29,7 @@ async def create_suitability_profile() -> Response:
     try:
         unique_id = await JwtService.decode_jwt_and_get_unique_id(jwt=jwt)
         await SuitabilityService.validate_current_onboarding_step(jwt=jwt)
-        success = await SuitabilityService.create(unique_id=unique_id)
+        success = await SuitabilityService.set_on_user(unique_id=unique_id)
         response = ResponseModel(
             success=success,
             message="Suitability profile successfully created",

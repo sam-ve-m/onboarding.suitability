@@ -108,7 +108,7 @@ async def test_when_get_suitability_return_empty_values_then_raises(
 @patch(
     "func.src.services.suitability.SuitabilityService._update_suitability_in_user_db"
 )
-@patch("func.src.services.suitability.Audit.send_suitability_log")
+@patch("func.src.services.suitability.Audit.record_message_log")
 @patch(
     "func.src.services.suitability.SuitabilityRepository.find_one_most_recent_suitability_answers",
     return_value=stub_suitability_answers,
@@ -117,7 +117,7 @@ async def test_when_get_suitability_return_empty_values_then_raises(
 async def test_when_create_suitability_success_then_return_true(
     mock_answers, mock_audit, mock_insert_suitability
 ):
-    result = await SuitabilityService.create(unique_id=stub_unique_id)
+    result = await SuitabilityService.set_on_user(unique_id=stub_unique_id)
 
     assert result is True
 

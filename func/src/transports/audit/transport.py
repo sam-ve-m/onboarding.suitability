@@ -13,7 +13,7 @@ class Audit:
     audit_client = Persephone
 
     @classmethod
-    async def send_suitability_log(cls, suitability_model: SuitabilityModel):
+    async def record_message_log(cls, suitability_model: SuitabilityModel):
         message = await suitability_model.get_audit_suitability_template()
         partition = QueueTypes.SUITABILITY
         topic = config("PERSEPHONE_TOPIC_USER")
@@ -32,3 +32,4 @@ class Audit:
                 message="Audit::register_user_log::Error on trying to register log"
             )
             raise ErrorOnSendAuditLog
+        return True
