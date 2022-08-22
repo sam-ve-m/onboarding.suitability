@@ -67,6 +67,26 @@ async def test_when_update_suitability_user_success_then_mock_was_called(
 
 
 @patch(
+    "func.src.services.suitability.UserRepository.update_one_with_suitability_data",
+    return_value=StubPymongoResults(True),
+)
+@patch(
+    "func.src.services.suitability.UserRepository.find_one_by_unique_id",
+    return_value=True,
+)
+@pytest.mark.asyncio
+@pytest.mark.asyncio
+async def test_when_update_suitability_user_success_then_return_true(
+    mock_find_one, mock_update_one
+):
+    result = await SuitabilityService._update_suitability_in_user_db(
+        unique_id=stub_unique_id, suitability_doc=stub_suitability_doc
+    )
+
+    assert result is True
+
+
+@patch(
     "func.src.services.suitability.SuitabilityRepository.find_one_most_recent_suitability_answers",
     return_value=stub_suitability_answers,
 )
