@@ -4,4 +4,4 @@
 apiVersion: fission.io/v1
 kind: DeploymentConfig
 name: onboarding-suitability
-uid: 3c2aef94-7b48-4466-b864-f4b1c537a98d
+uid: dbc858b8-fb8d-4907-a779-821f1e4f424c

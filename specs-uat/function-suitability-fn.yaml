@@ -1,14 +1,14 @@
 include:
 - ./func/*
 kind: ArchiveUploadSpec
-name: func-XTPe
+name: func-FWN3
 
 ---
 apiVersion: fission.io/v1
 kind: Package
 metadata:
   creationTimestamp: null
-  name: suitability-fn-6f9e7a77-d2ea-4800-b0db-40dd03895c29
+  name: suitability-fn-e66e06a1-c938-4fdc-8bd8-699d34896e8b
   namespace: default
 spec:
   deployment:
@@ -19,10 +19,10 @@ spec:
   source:
     checksum: {}
     type: url
-    url: archive://func-XTPe
+    url: archive://func-FWN3
 status:
   buildstatus: pending
-  lastUpdateTimestamp: "2022-07-26T13:25:59Z"
+  lastUpdateTimestamp: "2022-07-26T13:53:06Z"
 
 ---
 apiVersion: fission.io/v1
@@ -49,7 +49,7 @@ spec:
   package:
     functionName: main.create_suitability_profile
     packageref:
-      name: suitability-fn-6f9e7a77-d2ea-4800-b0db-40dd03895c29
+      name: suitability-fn-e66e06a1-c938-4fdc-8bd8-699d34896e8b
       namespace: default
   requestsPerPod: 1
   resources: {}

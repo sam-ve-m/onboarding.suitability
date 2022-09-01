@@ -10,7 +10,7 @@ class SuitabilityModel:
         self.version = version
         self.submission_date = datetime.utcnow()
 
-    def get_audit_suitability_template(self) -> dict:
+    async def get_audit_suitability_template(self) -> dict:
         normalized_answers = [
             {
                 "question_id": item.get("question_id"),
@@ -19,16 +19,16 @@ class SuitabilityModel:
             for item in self.answers
         ]
         audit_msg = {
-                "unique_id": self.unique_id,
-                "form": normalized_answers,
-                "version": self.version,
-                "score": self.score,
-                "profile": ProfileTypes.AGGRESSIVE,
-                "create_suitability_time_stamp": self.submission_date,
-            }
+            "unique_id": self.unique_id,
+            "form": normalized_answers,
+            "version": self.version,
+            "score": self.score,
+            "profile": ProfileTypes.AGGRESSIVE,
+            "create_suitability_time_stamp": self.submission_date,
+        }
         return audit_msg
 
-    def get_mongo_suitability_template(self):
+    async def get_mongo_suitability_template(self):
         suitability_doc = {
             "suitability": {
                 "score": self.score,

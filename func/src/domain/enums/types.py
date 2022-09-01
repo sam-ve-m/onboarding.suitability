@@ -1,4 +1,7 @@
+# Standards
 from enum import IntEnum
+
+# Third party
 from strenum import StrEnum
 
 
@@ -8,3 +11,7 @@ class QueueTypes(IntEnum):
 
 class ProfileTypes(StrEnum):
     AGGRESSIVE = "AGGRESSIVE"
+
+
+class UserOnboardingStep(StrEnum):
+    SUITABILITY = "suitability"
