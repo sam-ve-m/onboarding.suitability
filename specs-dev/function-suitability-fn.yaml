@@ -51,5 +51,5 @@ spec:
     packageref:
       name: suitability-fn-6f9e7a77-d2ea-4800-b0db-40dd03895c29
       namespace: default
-  requestsPerPod: 1
+  requestsPerPod: 10000
   resources: {}
