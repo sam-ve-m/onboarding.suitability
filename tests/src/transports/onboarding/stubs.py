@@ -13,5 +13,3 @@ class RequestStub:
 
 stub_request_success = RequestStub(status_code=200)
 stub_request_failure = RequestStub(status_code=500)
-
-print(stub_request_success.status_code)

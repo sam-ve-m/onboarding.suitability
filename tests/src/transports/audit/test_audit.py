@@ -1,5 +1,5 @@
 # Jormungandr - Onboarding
-from func.src.domain.exceptions.exceptions import ErrorOnSendAuditLog
+from func.src.domain.exceptions.transports.exception import ErrorOnSendAuditLog
 from func.src.transports.audit.transport import Audit
 from tests.src.services.suitability.stubs import stub_suitability_model
 

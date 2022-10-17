@@ -23,15 +23,15 @@ class SuitabilityService:
 
     @classmethod
     async def set_in_customer(
-        cls, unique_id: str, customers_answers: CustomerAnswers
+        cls, unique_id: str, customer_answers: CustomerAnswers
     ) -> bool:
         customer_suitability = await cls.__get_customer_suitability_from_khonshu(
-            customers_answers=customers_answers
+            customer_answers=customer_answers
         )
         suitability_model = SuitabilityModel(
             unique_id=unique_id,
             customer_suitability=customer_suitability,
-            customers_answers=customers_answers,
+            customer_answers=customer_answers,
         )
         await Audit.record_message_log(suitability_model=suitability_model)
         suitability = await suitability_model.get_mongo_suitability_template()
@@ -41,9 +41,9 @@ class SuitabilityService:
         return True
 
     @staticmethod
-    async def __get_customer_suitability_from_khonshu(customers_answers: CustomerAnswers) -> CustomerSuitability:
+    async def __get_customer_suitability_from_khonshu(customer_answers: CustomerAnswers) -> CustomerSuitability:
         success, khonshu_status, customer_suitability = await Khonshu.get_suitability_score(
-            customer_answers=customers_answers
+            customer_answers=customer_answers
         )
         if khonshu_status == KhonshuStatus.SUCCESS:
             return customer_suitability

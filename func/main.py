@@ -24,11 +24,11 @@ async def create_suitability_profile() -> Response:
     try:
         jwt = request.headers.get("x-thebes-answer")
         raw_customer_answers = request.json
-        customers_answers_validated = CustomerAnswers(**raw_customer_answers)
+        customer_answers_validated = CustomerAnswers(**raw_customer_answers)
         unique_id = await JwtService.decode_jwt_and_get_unique_id(jwt=jwt)
         await SuitabilityService.validate_current_onboarding_step(jwt=jwt)
         success = await SuitabilityService.set_in_customer(
-            unique_id=unique_id, customers_answers=customers_answers_validated
+            unique_id=unique_id, customer_answers=customer_answers_validated
         )
         response = ResponseModel(
             success=success,
