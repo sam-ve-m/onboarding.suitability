@@ -1,39 +1,39 @@
-from ...domain.enums.types import ProfileTypes
+# Standards
 from datetime import datetime
+
+# Third party
+from khonshu import CustomerAnswers, CustomerSuitability
+from pytz import timezone
 
 
 class SuitabilityModel:
-    def __init__(self, answers: list, score: float, unique_id: str, version: int):
-        self.answers = answers
-        self.score = score
+    def __init__(
+        self, customer_suitability: CustomerSuitability, unique_id: str, customers_answers: CustomerAnswers
+    ):
+        self.customer_questions_with_answers = customers_answers
+        self.profile = customer_suitability.profile
+        self.score = customer_suitability.score
         self.unique_id = unique_id
-        self.version = version
-        self.submission_date = datetime.utcnow()
+        self.version = customer_suitability.version
+        self.submission_date = datetime.now(tz=timezone("America/Sao_Paulo"))
 
     async def get_audit_suitability_template(self) -> dict:
-        normalized_answers = [
-            {
-                "question_id": item.get("question_id"),
-                "answer": item.get("answer"),
-            }
-            for item in self.answers
-        ]
         audit_msg = {
             "unique_id": self.unique_id,
-            "form": normalized_answers,
+            "form": self.customer_questions_with_answers,
             "version": self.version,
             "score": self.score,
-            "profile": ProfileTypes.AGGRESSIVE,
-            "create_suitability_time_stamp": self.submission_date,
+            "profile": self.profile,
         }
         return audit_msg
 
     async def get_mongo_suitability_template(self):
-        suitability_doc = {
+        suitability_template = {
             "suitability": {
                 "score": self.score,
+                "profile": self.profile,
                 "submission_date": self.submission_date,
                 "suitability_version": self.version,
             }
         }
-        return suitability_doc
+        return suitability_template

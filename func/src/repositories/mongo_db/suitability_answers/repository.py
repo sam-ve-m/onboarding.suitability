@@ -7,7 +7,6 @@ from etria_logger import Gladsheim
 
 
 class SuitabilityRepository(MongoDbBaseRepository):
-
     @classmethod
     async def _get_collection(cls):
         mongo_client = cls.infra.get_client()
@@ -16,7 +15,9 @@ class SuitabilityRepository(MongoDbBaseRepository):
             collection = database[config("MONGODB_SUITABILITY_ANSWERS_COLLECTION")]
             return collection
         except Exception as ex:
-            Gladsheim.error(error=ex, message="Error when trying to get mongo collection")
+            Gladsheim.error(
+                error=ex, message="Error when trying to get mongo collection"
+            )
             raise ex
 
     @classmethod

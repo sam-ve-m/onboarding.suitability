@@ -24,7 +24,7 @@ from func.src.services.suitability import SuitabilityService
 @pytest.mark.asyncio
 async def test_when_user_not_exists_then_raises_error(mock_find_one):
     with pytest.raises(ErrorOnFindUser):
-        await SuitabilityService._update_suitability_in_user_db(
+        await SuitabilityService.__save_customer_suitability_data(
             unique_id=stub_unique_id, suitability_doc=stub_suitability_doc
         )
 
@@ -42,7 +42,7 @@ async def test_when_update_suitability_user_fail_then_raises_error(
     mock_find_one, mock_update_one
 ):
     with pytest.raises(ErrorOnUpdateUser):
-        await SuitabilityService._update_suitability_in_user_db(
+        await SuitabilityService.__save_customer_suitability_data(
             unique_id=stub_unique_id, suitability_doc=stub_suitability_doc
         )
 
@@ -59,7 +59,7 @@ async def test_when_update_suitability_user_fail_then_raises_error(
 async def test_when_update_suitability_user_success_then_mock_was_called(
     mock_find_one, mock_update_one
 ):
-    await SuitabilityService._update_suitability_in_user_db(
+    await SuitabilityService.__save_customer_suitability_data(
         unique_id=stub_unique_id, suitability_doc=stub_suitability_doc
     )
     mock_find_one.assert_called_once_with(unique_id=stub_unique_id)
@@ -79,7 +79,7 @@ async def test_when_update_suitability_user_success_then_mock_was_called(
 async def test_when_update_suitability_user_success_then_return_true(
     mock_find_one, mock_update_one
 ):
-    result = await SuitabilityService._update_suitability_in_user_db(
+    result = await SuitabilityService.__save_customer_suitability_data(
         unique_id=stub_unique_id, suitability_doc=stub_suitability_doc
     )
 
@@ -137,7 +137,7 @@ async def test_when_get_suitability_return_empty_values_then_raises(
 async def test_when_create_suitability_success_then_return_true(
     mock_answers, mock_audit, mock_insert_suitability
 ):
-    result = await SuitabilityService.set_on_user(unique_id=stub_unique_id)
+    result = await SuitabilityService.set_in_customer(unique_id=stub_unique_id)
 
     assert result is True
 
@@ -148,9 +148,7 @@ async def test_when_create_suitability_success_then_return_true(
     return_value="suitability",
 )
 async def test_when_current_step_correct_then_return_true(mock_onboarding_steps):
-    result = await SuitabilityService.validate_current_onboarding_step(
-        jwt="123"
-    )
+    result = await SuitabilityService.validate_current_onboarding_step(jwt="123")
 
     assert result is True
 
