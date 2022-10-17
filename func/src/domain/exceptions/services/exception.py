@@ -40,7 +40,9 @@ class ErrorOnGetUniqueId(ServiceException):
 
 class ErrorCalculatingCustomerSuitability(ServiceException):
     def __init__(self, *args, **kwargs):
-        self.msg = "Fail when trying to calculating customer score and profile suitability"
+        self.msg = (
+            "Fail when trying to calculating customer score and profile suitability"
+        )
         self.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
         self.internal_code = InternalCode.ERROR_IN_KHONSHU
         self.success = False

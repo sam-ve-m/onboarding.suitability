@@ -1,5 +1,7 @@
 # Jormungandr - Onboarding
-from func.src.domain.exceptions.transports.exception import OnboardingStepsStatusCodeNotOk
+from func.src.domain.exceptions.transports.exception import (
+    OnboardingStepsStatusCodeNotOk,
+)
 from func.src.transports.onboarding_steps.transport import OnboardingSteps
 from tests.src.transports.onboarding.stubs import (
     stub_request_success,

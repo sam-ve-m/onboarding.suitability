@@ -22,12 +22,16 @@ class UserRepository(MongoDbBaseRepository):
             raise ex
 
     @classmethod
-    async def update_customer_suitability_data(cls, unique_id: str, suitability) -> UpdateResult:
+    async def update_customer_suitability_data(
+        cls, unique_id: str, suitability
+    ) -> UpdateResult:
         collection = await cls._get_collection()
         try:
-            user_updated = await collection.update_one({"unique_id": unique_id}, {"$set": suitability})
+            user_updated = await collection.update_one(
+                {"unique_id": unique_id}, {"$set": suitability}
+            )
             return user_updated
         except Exception as ex:
-            message = f'UserRepository::update_one_with_suitability_data::error on update user with this {unique_id=}'
+            message = f"UserRepository::update_one_with_suitability_data::error on update user with this {unique_id=}"
             Gladsheim.error(error=ex, message=message)
             raise ex

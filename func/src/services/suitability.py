@@ -41,10 +41,14 @@ class SuitabilityService:
         return True
 
     @staticmethod
-    async def __get_customer_suitability_from_khonshu(customer_answers: CustomerAnswers) -> CustomerSuitability:
-        success, khonshu_status, customer_suitability = await Khonshu.get_suitability_score(
-            customer_answers=customer_answers
-        )
+    async def __get_customer_suitability_from_khonshu(
+        customer_answers: CustomerAnswers,
+    ) -> CustomerSuitability:
+        (
+            success,
+            khonshu_status,
+            customer_suitability,
+        ) = await Khonshu.get_suitability_score(customer_answers=customer_answers)
         if khonshu_status == KhonshuStatus.SUCCESS:
             return customer_suitability
         raise ErrorCalculatingCustomerSuitability()
@@ -53,8 +57,10 @@ class SuitabilityService:
     async def __save_customer_suitability_data(
         unique_id: str, suitability: dict
     ) -> bool:
-        user_updated: UpdateResult = await UserRepository.update_customer_suitability_data(
-            unique_id=unique_id, suitability=suitability
+        user_updated: UpdateResult = (
+            await UserRepository.update_customer_suitability_data(
+                unique_id=unique_id, suitability=suitability
+            )
         )
         if not user_updated.matched_count:
             raise ErrorOnUpdateUser()

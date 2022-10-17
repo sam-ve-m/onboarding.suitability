@@ -8,7 +8,10 @@ from pytz import timezone
 
 class SuitabilityModel:
     def __init__(
-        self, customer_suitability: CustomerSuitability, unique_id: str, customer_answers: CustomerAnswers
+        self,
+        customer_suitability: CustomerSuitability,
+        unique_id: str,
+        customer_answers: CustomerAnswers,
     ):
         self.customer_questions_with_answers = customer_answers
         self.profile = customer_suitability.profile
