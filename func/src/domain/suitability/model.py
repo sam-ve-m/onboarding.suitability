@@ -13,7 +13,7 @@ class SuitabilityModel:
         unique_id: str,
         customer_answers: CustomerAnswers,
     ):
-        self.customer_questions_with_answers = customer_answers
+        self.customer_questions_with_answers = customer_answers.dict().get("answers")
         self.profile = customer_suitability.profile
         self.score = customer_suitability.score
         self.unique_id = unique_id

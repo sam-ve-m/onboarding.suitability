@@ -18,10 +18,10 @@ spec:
     container:
       name: ""
       resources: {}
-    image: nexus.sigame.com.br/fission-async:0.1.8
+    image: nexus.sigame.com.br/fission-async:0.1.9
     podspec:
       containers:
-        - name: selfie-env
+        - name: suitability-env
           env:
             - name: ROOT_LOG_LEVEL
               value: "INFO"
