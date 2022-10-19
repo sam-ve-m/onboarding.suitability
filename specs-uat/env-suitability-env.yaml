@@ -18,7 +18,7 @@ spec:
     container:
       name: ""
       resources: {}
-    image: nexus.sigame.com.br/fission-async:0.1.6
+    image: nexus.sigame.com.br/fission-async:0.1.8
     podspec:
       containers:
         - name: selfie-env
@@ -36,7 +36,7 @@ spec:
             - name: PERSEPHONE_KAFKA_BROKERS
               value: "cluster-kafka-bootstrap.kafka.svc.cluster.local:9092"
             - name: MONGO_CONNECTION_URL
-              value: "mongodb://jormungandr:MMhsdanNNds32Malmnwqyrte@172.30.18.223:41000,172.30.19.240:41000,172.30.19.71:41000/?authSource=admin&replicaSet=rslionx&readPreference=secondary&ssl=false"
+              value: "mongodb://jormungandr:MMhsdanNNds32Malmnwqyrte@172.30.18.223:41000,172.30.19.240:41000,172.30.19.71:41000/?authSource=admin&replicaSet=rslionx&readPreference=primary"
             - name: MONGODB_DATABASE_NAME
               value: "lionx"
             - name: MONGODB_USER_COLLECTION
@@ -57,4 +57,28 @@ spec:
               value: "redis://heimdal:FBJAnjkqw21yjewkDSA@172.30.19.183:6379?db=1"
             - name: ONBOARDING_STEPS_BR_URL
               value: "http://router.fission.svc.cluster.local/onboarding/steps_br"
+            - name: MONGODB_SUITABILITY_COLLECTION
+              value: "suitability"
+            - name: MNEMOSINE_REDIS_HOST
+              value: "redis://jormungandr:Mdn45oodsanPOhbrewbDS@172.30.19.183:6379"
+            - name: REDIS_SUITABILITY_KEY
+              value: "suitability_questions"
+            - name: REDIS_TIME_TO_LIVE
+              value: "86400"
+            - name: QUESTION_FIRST_ID
+              value: "1"
+            - name: ANSWER_FIRST_ID
+              value: "1"
+            - name: QUESTION_FINAL_ID
+              value: "8"
+            - name: ANSWER_FINAL_ID
+              value: "4"
+            - name: FIRST_PROFILE_RANGE
+              value: "0.5680"
+            - name: SECOND_PROFILE_RANGE
+              value: "0.6399"
+            - name: THIRD_PROFILE_RANGE
+              value: "0.7899"
+            - name: FOURTH_PROFILE_RANGE
+              value: "1.0000"
   version: 3
