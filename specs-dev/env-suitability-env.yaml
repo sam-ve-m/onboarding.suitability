@@ -18,7 +18,7 @@ spec:
     container:
       name: ""
       resources: {}
-    image: nexus.sigame.com.br/fission-async:0.1.6
+    image: nexus.sigame.com.br/fission-async:0.1.9
     podspec:
       containers:
         - name: suitability-env
@@ -57,4 +57,28 @@ spec:
               value: "redis://heimdal:LLOnmUUffhaUHnewIz@172.30.11.235:6379?db=1"
             - name: ONBOARDING_STEPS_BR_URL
               value: "http://router.fission.svc.cluster.local/onboarding/steps_br"
+            - name: MONGODB_SUITABILITY_COLLECTION
+              value: "suitability"
+            - name: MNEMOSINE_REDIS_HOST
+              value: "redis://jormungandr:oUjqwnmdDSA391dja@172.30.11.235:6379"
+            - name: REDIS_SUITABILITY_KEY
+              value: "suitability_questions"
+            - name: REDIS_TIME_TO_LIVE
+              value: "86400"
+            - name: QUESTION_FIRST_ID
+              value: "1"
+            - name: ANSWER_FIRST_ID
+              value: "1"
+            - name: QUESTION_FINAL_ID
+              value: "8"
+            - name: ANSWER_FINAL_ID
+              value: "4"
+            - name: FIRST_PROFILE_RANGE
+              value: "0.5680"
+            - name: SECOND_PROFILE_RANGE
+              value: "0.6399"
+            - name: THIRD_PROFILE_RANGE
+              value: "0.7899"
+            - name: FOURTH_PROFILE_RANGE
+              value: "1.0000"
   version: 3

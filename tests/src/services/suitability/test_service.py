@@ -1,143 +1,134 @@
-import pytest
-from unittest.mock import patch
+# Jormungandr - Onboarding
 from .stubs import (
     stub_unique_id,
-    stub_suitability_doc,
+    stub_mongodb_suitability_template,
     StubPymongoResults,
-    stub_suitability_answers,
-    stub_suitability_empty_answers,
+    stub_customer_answers,
+    stub_khonshu_response,
+    stub_khonshu_response_failure,
 )
-from func.src.domain.exceptions.exceptions import (
-    ErrorOnUpdateUser,
-    ErrorOnFindUser,
-    NoSuitabilityAnswersFound,
-    SuitabilityEmptyValues,
-    InvalidOnboardingCurrentStep,
+from func.src.domain.exceptions.repositories.exception import ErrorOnUpdateUser
+from func.src.domain.exceptions.services.exception import (
+    ErrorCalculatingCustomerSuitability,
 )
+from func.src.domain.exceptions.transports.exception import InvalidOnboardingCurrentStep
 from func.src.services.suitability import SuitabilityService
 
+# Standards
+from unittest.mock import patch
 
-@patch(
-    "func.src.services.suitability.UserRepository.find_one_by_unique_id",
-    return_value=False,
-)
-@pytest.mark.asyncio
-async def test_when_user_not_exists_then_raises_error(mock_find_one):
-    with pytest.raises(ErrorOnFindUser):
-        await SuitabilityService._update_suitability_in_user_db(
-            unique_id=stub_unique_id, suitability_doc=stub_suitability_doc
-        )
+# Third party
+import pytest
+from khonshu import CustomerSuitability
 
 
 @patch(
-    "func.src.services.suitability.UserRepository.update_one_with_suitability_data",
+    "func.src.services.suitability.UserRepository.update_customer_suitability_data",
     return_value=StubPymongoResults(),
 )
-@patch(
-    "func.src.services.suitability.UserRepository.find_one_by_unique_id",
-    return_value=True,
-)
 @pytest.mark.asyncio
-async def test_when_update_suitability_user_fail_then_raises_error(
-    mock_find_one, mock_update_one
-):
+async def test_when_update_customer_suitability_fail_then_raises(mock_update_one):
     with pytest.raises(ErrorOnUpdateUser):
-        await SuitabilityService._update_suitability_in_user_db(
-            unique_id=stub_unique_id, suitability_doc=stub_suitability_doc
+        await SuitabilityService._SuitabilityService__save_customer_suitability_data(
+            unique_id=stub_unique_id, suitability=stub_mongodb_suitability_template
         )
 
 
 @patch(
-    "func.src.services.suitability.UserRepository.update_one_with_suitability_data",
+    "func.src.services.suitability.UserRepository.update_customer_suitability_data",
     return_value=StubPymongoResults(True),
 )
-@patch(
-    "func.src.services.suitability.UserRepository.find_one_by_unique_id",
-    return_value=True,
-)
 @pytest.mark.asyncio
-async def test_when_update_suitability_user_success_then_mock_was_called(
-    mock_find_one, mock_update_one
+async def test_when_update_customer_suitability_with_success_then_mock_was_called(
+    mock_update_one,
 ):
-    await SuitabilityService._update_suitability_in_user_db(
-        unique_id=stub_unique_id, suitability_doc=stub_suitability_doc
+    await SuitabilityService._SuitabilityService__save_customer_suitability_data(
+        unique_id=stub_unique_id, suitability=stub_mongodb_suitability_template
     )
-    mock_find_one.assert_called_once_with(unique_id=stub_unique_id)
-    mock_update_one.assert_called_once_with(user=True, suitability=stub_suitability_doc)
+    mock_update_one.assert_called_once_with(
+        unique_id=stub_unique_id, suitability=stub_mongodb_suitability_template
+    )
 
 
 @patch(
-    "func.src.services.suitability.UserRepository.update_one_with_suitability_data",
+    "func.src.services.suitability.UserRepository.update_customer_suitability_data",
     return_value=StubPymongoResults(True),
 )
-@patch(
-    "func.src.services.suitability.UserRepository.find_one_by_unique_id",
-    return_value=True,
-)
 @pytest.mark.asyncio
 @pytest.mark.asyncio
-async def test_when_update_suitability_user_success_then_return_true(
-    mock_find_one, mock_update_one
+async def test_when_update_customer_suitability_with_success_then_return_true(
+    mock_update_one,
 ):
-    result = await SuitabilityService._update_suitability_in_user_db(
-        unique_id=stub_unique_id, suitability_doc=stub_suitability_doc
+    result = (
+        await SuitabilityService._SuitabilityService__save_customer_suitability_data(
+            unique_id=stub_unique_id, suitability=stub_mongodb_suitability_template
+        )
     )
 
     assert result is True
 
 
 @patch(
-    "func.src.services.suitability.SuitabilityRepository.find_one_most_recent_suitability_answers",
-    return_value=stub_suitability_answers,
+    "func.src.services.suitability.Khonshu.get_suitability_score",
+    return_value=stub_khonshu_response,
 )
 @pytest.mark.asyncio
-async def test_when_get_suitability_success_then_return_answer_score_and_version(
-    mock_find_most_recent_suitability,
+async def test_when_get_customer_suitability_response_from_khonshu_with_success_then_return_customer_suitability_instance(
+    mock_khonshu,
 ):
-    answers, score, version = await SuitabilityService._get_suitability_answers()
+    customer_suitability = await SuitabilityService._SuitabilityService__get_customer_suitability_from_khonshu(
+        customer_answers=stub_customer_answers
+    )
 
-    assert isinstance(answers, list)
-    assert isinstance(score, float)
-    assert isinstance(version, int)
+    assert isinstance(customer_suitability, CustomerSuitability)
 
 
 @patch(
-    "func.src.services.suitability.SuitabilityRepository.find_one_most_recent_suitability_answers",
-    return_value=False,
+    "func.src.services.suitability.Khonshu.get_suitability_score",
+    return_value=stub_khonshu_response,
 )
 @pytest.mark.asyncio
-async def test_when_get_suitability_return_none_then_raises(
-    mock_find_most_recent_suitability,
+async def test_when_get_customer_suitability_response_from_khonshu_with_success_then_return_customer_suitability_expeceted_values(
+    mock_khonshu,
 ):
-    with pytest.raises(NoSuitabilityAnswersFound):
-        await SuitabilityService._get_suitability_answers()
+    customer_suitability = await SuitabilityService._SuitabilityService__get_customer_suitability_from_khonshu(
+        customer_answers=stub_customer_answers
+    )
+
+    assert customer_suitability.profile == 1
+    assert customer_suitability.score == 0.6215
+    assert customer_suitability.version == 13
 
 
 @patch(
-    "func.src.services.suitability.SuitabilityRepository.find_one_most_recent_suitability_answers",
-    return_value=stub_suitability_empty_answers,
+    "func.src.services.suitability.Khonshu.get_suitability_score",
+    return_value=stub_khonshu_response_failure,
 )
 @pytest.mark.asyncio
-async def test_when_get_suitability_return_empty_values_then_raises(
-    mock_find_most_recent_suitability,
+async def test_when_get_customer_suitability_from_khonshu_is_not_success_then_raises(
+    mock_khonshu,
 ):
-    with pytest.raises(SuitabilityEmptyValues):
-        await SuitabilityService._get_suitability_answers()
+    with pytest.raises(ErrorCalculatingCustomerSuitability):
+        await SuitabilityService._SuitabilityService__get_customer_suitability_from_khonshu(
+            customer_answers=stub_customer_answers
+        )
 
 
 @patch(
-    "func.src.services.suitability.SuitabilityService._update_suitability_in_user_db"
+    "func.src.services.suitability.SuitabilityService._SuitabilityService__save_customer_suitability_data"
 )
 @patch("func.src.services.suitability.Audit.record_message_log")
 @patch(
-    "func.src.services.suitability.SuitabilityRepository.find_one_most_recent_suitability_answers",
-    return_value=stub_suitability_answers,
+    "func.src.services.suitability.Khonshu.get_suitability_score",
+    return_value=stub_khonshu_response,
 )
 @pytest.mark.asyncio
-async def test_when_create_suitability_success_then_return_true(
-    mock_answers, mock_audit, mock_insert_suitability
+async def test_when_create_suitability_with_success_then_return_true(
+    mock_khonshu_response, mock_audit_response, mock_save_suitability
 ):
-    result = await SuitabilityService.set_on_user(unique_id=stub_unique_id)
+    result = await SuitabilityService.set_in_customer(
+        unique_id=stub_unique_id, customer_answers=stub_customer_answers
+    )
 
     assert result is True
 
@@ -148,9 +139,7 @@ async def test_when_create_suitability_success_then_return_true(
     return_value="suitability",
 )
 async def test_when_current_step_correct_then_return_true(mock_onboarding_steps):
-    result = await SuitabilityService.validate_current_onboarding_step(
-        jwt="123"
-    )
+    result = await SuitabilityService.validate_current_onboarding_step(jwt="123")
 
     assert result is True
 

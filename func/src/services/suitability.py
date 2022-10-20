@@ -1,66 +1,67 @@
 # Jormungandr - Onboarding
 from ..domain.enums.types import UserOnboardingStep
-from ..domain.exceptions.exceptions import (
-    ErrorOnFindUser,
-    ErrorOnUpdateUser,
-    NoSuitabilityAnswersFound,
-    SuitabilityEmptyValues,
-    InvalidOnboardingCurrentStep
-)
+from ..domain.exceptions.repositories.exception import ErrorOnUpdateUser
+from ..domain.exceptions.services.exception import ErrorCalculatingCustomerSuitability
+from ..domain.exceptions.transports.exception import InvalidOnboardingCurrentStep
 from ..domain.suitability.model import SuitabilityModel
-from ..repositories.mongo_db.suitability_answers.repository import SuitabilityRepository
 from ..repositories.mongo_db.user.repository import UserRepository
 from ..transports.audit.transport import Audit
 from ..transports.onboarding_steps.transport import OnboardingSteps
 
-# Standards
-from typing import Tuple
+# Third party
+from khonshu import Khonshu, KhonshuStatus, CustomerSuitability, CustomerAnswers
+from pymongo.results import UpdateResult
 
 
 class SuitabilityService:
-
     @staticmethod
     async def validate_current_onboarding_step(jwt: str) -> bool:
         user_current_step = await OnboardingSteps.get_user_current_step(jwt=jwt)
         if not user_current_step == UserOnboardingStep.SUITABILITY:
-            raise InvalidOnboardingCurrentStep
+            raise InvalidOnboardingCurrentStep()
         return True
 
-    @staticmethod
-    async def set_on_user(unique_id: str) -> bool:
-        answers, score, version = await SuitabilityService._get_suitability_answers()
+    @classmethod
+    async def set_in_customer(
+        cls, unique_id: str, customer_answers: CustomerAnswers
+    ) -> bool:
+        customer_suitability = await cls.__get_customer_suitability_from_khonshu(
+            customer_answers=customer_answers
+        )
         suitability_model = SuitabilityModel(
-            answers=answers, score=score, unique_id=unique_id, version=version
+            unique_id=unique_id,
+            customer_suitability=customer_suitability,
+            customer_answers=customer_answers,
         )
         await Audit.record_message_log(suitability_model=suitability_model)
-        suitability_doc = await suitability_model.get_mongo_suitability_template()
-        await SuitabilityService._update_suitability_in_user_db(
-            unique_id=unique_id, suitability_doc=suitability_doc
+        suitability = await suitability_model.get_mongo_suitability_template()
+        await SuitabilityService.__save_customer_suitability_data(
+            unique_id=unique_id, suitability=suitability
         )
         return True
 
     @staticmethod
-    async def _get_suitability_answers() -> Tuple[list, float, int]:
-        suitability_answers = (
-            await SuitabilityRepository.find_one_most_recent_suitability_answers()
-        )
-        if not suitability_answers:
-            raise NoSuitabilityAnswersFound
-        answers = suitability_answers.get("answers")
-        score = suitability_answers.get("score")
-        version = suitability_answers.get("suitability_version")
-        if not all([answers, score, version]):
-            raise SuitabilityEmptyValues
-        return answers, score, version
+    async def __get_customer_suitability_from_khonshu(
+        customer_answers: CustomerAnswers,
+    ) -> CustomerSuitability:
+        (
+            success,
+            khonshu_status,
+            customer_suitability,
+        ) = await Khonshu.get_suitability_score(customer_answers=customer_answers)
+        if khonshu_status == KhonshuStatus.SUCCESS:
+            return customer_suitability
+        raise ErrorCalculatingCustomerSuitability()
 
     @staticmethod
-    async def _update_suitability_in_user_db(unique_id: str, suitability_doc: dict) -> bool:
-        user = await UserRepository.find_one_by_unique_id(unique_id=unique_id)
-        if not user:
-            raise ErrorOnFindUser
-        user_updated = await UserRepository.update_one_with_suitability_data(
-            user=user, suitability=suitability_doc
+    async def __save_customer_suitability_data(
+        unique_id: str, suitability: dict
+    ) -> bool:
+        user_updated: UpdateResult = (
+            await UserRepository.update_customer_suitability_data(
+                unique_id=unique_id, suitability=suitability
+            )
         )
         if not user_updated.matched_count:
-            raise ErrorOnUpdateUser
+            raise ErrorOnUpdateUser()
         return True
