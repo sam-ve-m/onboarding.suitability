@@ -1,16 +1,11 @@
 # Jormungandr - Onboarding
-from src.domain.exceptions.exceptions import (
-    ErrorOnSendAuditLog,
-    ErrorOnUpdateUser,
-    ErrorOnFindUser,
-    ErrorOnDecodeJwt,
-    SuitabilityEmptyValues,
-    NoSuitabilityAnswersFound,
-    ErrorOnGetUniqueId,
-    OnboardingStepsStatusCodeNotOk,
-    InvalidOnboardingCurrentStep,
+from src.domain.exceptions.base.base_exceptions import (
+    ServiceException,
+    RepositoryException,
+    TransportException,
+    DomainException,
+    InternalCode,
 )
-from src.domain.enums.code import InternalCode
 from src.domain.response.model import ResponseModel
 from src.services.jwt import JwtService
 from src.services.suitability import SuitabilityService
@@ -21,94 +16,69 @@ from http import HTTPStatus
 # Third party
 from etria_logger import Gladsheim
 from flask import request, Response
+from khonshu import CustomerAnswers
+from pydantic import ValidationError
 
 
 async def create_suitability_profile() -> Response:
-    jwt = request.headers.get("x-thebes-answer")
-    msg_error = "Unexpected error occurred"
     try:
+        jwt = request.headers.get("x-thebes-answer")
+        raw_customer_answers = request.json
+        customer_answers_validated = CustomerAnswers(**raw_customer_answers)
         unique_id = await JwtService.decode_jwt_and_get_unique_id(jwt=jwt)
         await SuitabilityService.validate_current_onboarding_step(jwt=jwt)
-        success = await SuitabilityService.set_on_user(unique_id=unique_id)
+        success = await SuitabilityService.set_in_customer(
+            unique_id=unique_id, customer_answers=customer_answers_validated
+        )
         response = ResponseModel(
             success=success,
-            message="Suitability profile successfully created",
+            message="Suitability score and profile successfully created",
             code=InternalCode.SUCCESS,
-        ).build_http_response(status=HTTPStatus.OK)
+        ).build_http_response(status_code=HTTPStatus.OK)
         return response
 
-    except ErrorOnDecodeJwt as ex:
-        Gladsheim.error(error=ex, message=ex.msg)
+    except ServiceException as err:
+        Gladsheim.error(error=err, message=err.msg)
         response = ResponseModel(
-            success=False, code=InternalCode.JWT_INVALID, message="Unauthorized token"
-        ).build_http_response(status=HTTPStatus.UNAUTHORIZED)
+            success=err.success, message=err.msg, code=err.code
+        ).build_http_response(status_code=err.status_code)
         return response
 
-    except OnboardingStepsStatusCodeNotOk as ex:
-        Gladsheim.info(error=ex, message=ex.msg)
+    except DomainException as err:
+        Gladsheim.error(error=err, message=err.msg)
+        response = ResponseModel(
+            success=err.success, message=err.msg, code=err.code
+        ).build_http_response(status_code=err.status_code)
+        return response
+
+    except TransportException as err:
+        Gladsheim.error(error=err, message=err.msg)
+        response = ResponseModel(
+            success=err.success, message=err.msg, code=err.code
+        ).build_http_response(status_code=err.status_code)
+        return response
+
+    except RepositoryException as err:
+        Gladsheim.error(error=err, message=err.msg)
+        response = ResponseModel(
+            success=err.success, message=err.msg, code=err.code
+        ).build_http_response(status_code=err.status_code)
+        return response
+
+    except ValidationError as err:
+        Gladsheim.error(error=err)
         response = ResponseModel(
             success=False,
-            code=InternalCode.ONBOARDING_STEP_REQUEST_FAILURE,
-            message=msg_error,
-        ).build_http_response(status=HTTPStatus.INTERNAL_SERVER_ERROR)
-        return response
-
-    except InvalidOnboardingCurrentStep as ex:
-        Gladsheim.info(error=ex, message=ex.msg)
-        response = ResponseModel(
-            success=False,
-            code=InternalCode.ONBOARDING_STEP_INCORRECT,
-            message="User is not in correct step",
-        ).build_http_response(status=HTTPStatus.BAD_REQUEST)
-        return response
-
-    except ErrorOnGetUniqueId as ex:
-        Gladsheim.info(error=ex, message=ex.msg)
-        response = ResponseModel(
-            success=False,
-            code=InternalCode.JWT_INVALID,
-            message="Fail to get unique_id",
-        ).build_http_response(status=HTTPStatus.UNAUTHORIZED)
-        return response
-
-    except NoSuitabilityAnswersFound as ex:
-        Gladsheim.info(error=ex, message=ex.msg)
-        response = ResponseModel(
-            success=False, code=InternalCode.DATA_NOT_FOUND, message=msg_error
-        ).build_http_response(status=HTTPStatus.INTERNAL_SERVER_ERROR)
-        return response
-
-    except SuitabilityEmptyValues as ex:
-        Gladsheim.info(error=ex, message=ex.msg)
-        response = ResponseModel(
-            success=False, code=InternalCode.DATA_NOT_FOUND, message=msg_error
-        ).build_http_response(status=HTTPStatus.INTERNAL_SERVER_ERROR)
-        return response
-
-    except ErrorOnFindUser as ex:
-        Gladsheim.info(error=ex, message=ex.msg)
-        response = ResponseModel(
-            success=False, code=InternalCode.DATA_NOT_FOUND, message=msg_error
-        ).build_http_response(status=HTTPStatus.BAD_REQUEST)
-        return response
-
-    except ErrorOnUpdateUser as ex:
-        Gladsheim.info(error=ex, message=ex.msg)
-        response = ResponseModel(
-            success=False, code=InternalCode.INTERNAL_SERVER_ERROR, message=msg_error
-        ).build_http_response(status=HTTPStatus.INTERNAL_SERVER_ERROR)
-        return response
-
-    except ErrorOnSendAuditLog as ex:
-        Gladsheim.info(error=ex, message=ex.msg)
-        response = ResponseModel(
-            success=False, code=InternalCode.INTERNAL_SERVER_ERROR, message=msg_error
-        ).build_http_response(status=HTTPStatus.INTERNAL_SERVER_ERROR)
+            message="Invalid customer answers format",
+            code=InternalCode.INVALID_PARAMS,
+        ).build_http_response(status_code=HTTPStatus.BAD_REQUEST)
         return response
 
     except Exception as ex:
-        Gladsheim.error(error=ex, message="Unexpected error occurred")
+        Gladsheim.error(error=ex)
         response = ResponseModel(
-            success=False, code=InternalCode.INTERNAL_SERVER_ERROR, message=msg_error
-        ).build_http_response(status=HTTPStatus.INTERNAL_SERVER_ERROR)
+            success=False,
+            code=InternalCode.INTERNAL_SERVER_ERROR,
+            message="Unexpected error has occurred",
+        ).build_http_response(status_code=HTTPStatus.INTERNAL_SERVER_ERROR)
         return response

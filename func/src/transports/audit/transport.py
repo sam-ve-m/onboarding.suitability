@@ -1,6 +1,6 @@
 # Jormungandr-Onboarding
 from ...domain.enums.types import QueueTypes
-from ...domain.exceptions.exceptions import ErrorOnSendAuditLog
+from ...domain.exceptions.transports.exception import ErrorOnSendAuditLog
 from ...domain.suitability.model import SuitabilityModel
 
 # Third party
@@ -13,7 +13,7 @@ class Audit:
     audit_client = Persephone
 
     @classmethod
-    async def record_message_log(cls, suitability_model: SuitabilityModel):
+    async def record_message_log(cls, suitability_model: SuitabilityModel) -> bool:
         message = await suitability_model.get_audit_suitability_template()
         partition = QueueTypes.SUITABILITY
         topic = config("PERSEPHONE_TOPIC_USER")
@@ -29,7 +29,7 @@ class Audit:
         )
         if not success:
             Gladsheim.error(
-                message="Audit::register_user_log::Error on trying to register log"
+                message="Audit::record_message_log::Error when trying to register suitability log"
             )
-            raise ErrorOnSendAuditLog
+            raise ErrorOnSendAuditLog()
         return True

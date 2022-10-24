@@ -1,4 +1,4 @@
-# Jormungandr
+# Jormungandr - Suitability
 from ...domain.enums.code import InternalCode
 
 # Standards
@@ -31,11 +31,11 @@ class ResponseModel:
         return response_model
 
     def build_http_response(
-        self, status: int, mimetype: str = "application/json"
+        self, status_code: int, mimetype: str = "application/json"
     ) -> Response:
         http_response = Response(
             self.response,
             mimetype=mimetype,
-            status=status,
+            status=status_code,
         )
         return http_response
