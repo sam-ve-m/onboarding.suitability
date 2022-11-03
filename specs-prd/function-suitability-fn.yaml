@@ -1,0 +1,55 @@
+include:
+- ./func/*
+kind: ArchiveUploadSpec
+name: func-XTPe
+
+---
+apiVersion: fission.io/v1
+kind: Package
+metadata:
+  creationTimestamp: null
+  name: suitability-fn-6f9e7a77-d2ea-4800-b0db-40dd03895c29
+  namespace: default
+spec:
+  deployment:
+    checksum: {}
+  environment:
+    name: suitability-env
+    namespace: default
+  source:
+    checksum: {}
+    type: url
+    url: archive://func-XTPe
+status:
+  buildstatus: pending
+  lastUpdateTimestamp: "2022-07-26T13:25:59Z"
+
+---
+apiVersion: fission.io/v1
+kind: Function
+metadata:
+  creationTimestamp: null
+  name: suitability-fn
+  namespace: default
+spec:
+  InvokeStrategy:
+    ExecutionStrategy:
+      ExecutorType: newdeploy
+      MaxScale: 3
+      MinScale: 1
+      SpecializationTimeout: 120
+      TargetCPUPercent: 80
+    StrategyType: execution
+  concurrency: 500
+  environment:
+    name: suitability-env
+    namespace: default
+  functionTimeout: 60
+  idletimeout: 120
+  package:
+    functionName: main.create_suitability_profile
+    packageref:
+      name: suitability-fn-6f9e7a77-d2ea-4800-b0db-40dd03895c29
+      namespace: default
+  requestsPerPod: 10000
+  resources: {}
