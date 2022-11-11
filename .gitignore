@@ -51,3 +51,4 @@ Thumbs.db
 # others
 func/requirements.example.txt
 .coverage
+venv/
