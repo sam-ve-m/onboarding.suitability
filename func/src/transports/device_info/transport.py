@@ -24,7 +24,6 @@ class DeviceSecurity:
             if request_result.status_code != HTTPStatus.OK:
                 raise DeviceInfoRequestFailed()
         device_info_decrypted = request_result.json().get("deviceInfo")
-        device_info = DeviceInfo(**device_info_decrypted)
         return device_info_decrypted
 
     @staticmethod
