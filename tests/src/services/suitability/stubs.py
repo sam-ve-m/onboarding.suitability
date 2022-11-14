@@ -43,7 +43,7 @@ stub_customer_suitability_calculated = CustomerSuitability(
     profile=1, version=13, score=0.6215
 )
 
-stub_device_info = DeviceInfo(1, 1, 1, 1)
+stub_device_info = DeviceInfo({"precision": 1}, "")
 
 stub_suitability_model = SuitabilityModel(
     unique_id=stub_unique_id,

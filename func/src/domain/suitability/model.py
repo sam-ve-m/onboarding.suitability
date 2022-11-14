@@ -29,10 +29,8 @@ class SuitabilityModel:
             "version": self.version,
             "score": self.score,
             "profile": self.profile,
-            "ip": self.device_info.ip,
-            "latitude": self.device_info.latitude,
-            "longitude": self.device_info.longitude,
-            "precision": self.device_info.precision,
+            "device_info": self.device_info.device_info,
+            "device_id": self.device_info.device_id,
         }
         return audit_msg
 

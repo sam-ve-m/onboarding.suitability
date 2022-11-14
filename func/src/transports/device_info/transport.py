@@ -1,3 +1,4 @@
+import asyncio
 from http import HTTPStatus
 
 from decouple import config
@@ -12,7 +13,7 @@ from ...domain.models.device_info import DeviceInfo
 
 class DeviceSecurity:
     @staticmethod
-    async def decrypt_device_info(device_info: str) -> DeviceInfo:
+    async def decrypt_device_info(device_info: str) -> dict:
         if not device_info:
             raise DeviceInfoNotSupplied()
         body = {"deviceInfo": device_info}
@@ -24,7 +25,7 @@ class DeviceSecurity:
                 raise DeviceInfoRequestFailed()
         device_info_decrypted = request_result.json().get("deviceInfo")
         device_info = DeviceInfo(**device_info_decrypted)
-        return device_info
+        return device_info_decrypted
 
     @staticmethod
     async def generate_device_id(device_info: str) -> str:
@@ -39,3 +40,15 @@ class DeviceSecurity:
                 raise DeviceInfoRequestFailed()
         device_id = request_result.json().get("deviceID")
         return device_id
+
+    @classmethod
+    async def get_device_info(cls, device_info: str) -> DeviceInfo:
+        device_information_coroutine = cls.decrypt_device_info(device_info)
+        device_id_coroutine = cls.generate_device_id(device_info)
+        device_information, device_id = await asyncio.gather(
+            device_information_coroutine, device_id_coroutine
+        )
+        device_info_object = DeviceInfo(
+            device_info=device_information, device_id=device_id
+        )
+        return device_info_object

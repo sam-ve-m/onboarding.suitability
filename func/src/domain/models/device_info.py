@@ -1,20 +1,15 @@
-from typing import Optional
-
 from decouple import config
 
 
 class DeviceInfo:
     def __init__(
         self,
-        ip: str,
-        latitude: float,
-        longitude: float,
-        precision: Optional[float] = None,
-        **kwargs
+        device_info: dict,
+        device_id: str,
     ):
-        self.ip = ip
-        self.latitude = latitude
-        self.longitude = longitude
-        self.precision = precision
-        if precision is None:
-            self.precision = float(config("DEFAULT_PRECISION_VALUE"))
+        self.device_info = device_info
+        self.device_id = device_id
+        if device_info.get("precision") is None:
+            self.device_info.update(
+                {"precision": float(config("DEFAULT_PRECISION_VALUE"))}
+            )

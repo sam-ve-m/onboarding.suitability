@@ -26,7 +26,7 @@ async def create_suitability_profile() -> Response:
 
         customer_answers_validated = CustomerAnswers(**raw_customer_answers)
         unique_id = await JwtService.decode_jwt_and_get_unique_id(jwt=jwt)
-        device_info = await DeviceSecurity.decrypt_device_info(encoded_device_info)
+        device_info = await DeviceSecurity.get_device_info(encoded_device_info)
         await SuitabilityService.validate_current_onboarding_step(jwt=jwt)
 
         success = await SuitabilityService.set_in_customer(
