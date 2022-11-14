@@ -1,4 +1,7 @@
-# Jormungandr - Onboarding
+from unittest.mock import patch
+
+import pytest
+
 from func.src.domain.exceptions.transports.exception import (
     OnboardingStepsStatusCodeNotOk,
 )
@@ -7,12 +10,6 @@ from tests.src.transports.onboarding.stubs import (
     stub_request_success,
     stub_request_failure,
 )
-
-# Standards
-from unittest.mock import patch
-
-# Third party
-import pytest
 
 
 @pytest.mark.asyncio

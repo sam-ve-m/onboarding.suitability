@@ -1,28 +1,41 @@
-# Jormungandr - Onboarding
-from .stubs import (
-    stub_unique_id,
-    stub_mongodb_suitability_template,
-    StubPymongoResults,
-    stub_customer_answers,
-    stub_khonshu_response,
-    stub_khonshu_response_failure,
-)
-from func.src.domain.exceptions.repositories.exception import ErrorOnUpdateUser
-from func.src.domain.exceptions.services.exception import (
-    ErrorCalculatingCustomerSuitability,
-)
-from func.src.domain.exceptions.transports.exception import InvalidOnboardingCurrentStep
-from func.src.services.suitability import SuitabilityService
+import os
+from unittest import mock
 
-# Standards
-from unittest.mock import patch
-
-# Third party
 import pytest
 from khonshu import CustomerSuitability
 
+env_mock = {
+    "QUESTION_FIRST_ID": "1",
+    "ANSWER_FIRST_ID": "1",
+    "QUESTION_FINAL_ID": "8",
+    "ANSWER_FINAL_ID": "4",
+    "FIRST_PROFILE_RANGE": "0.5680",
+    "SECOND_PROFILE_RANGE": "0.6399",
+    "THIRD_PROFILE_RANGE": "0.7899",
+    "FOURTH_PROFILE_RANGE": "1.0000",
+}
 
-@patch(
+with mock.patch.dict(os.environ, env_mock):
+    from .stubs import (
+        stub_unique_id,
+        stub_mongodb_suitability_template,
+        StubPymongoResults,
+        stub_customer_answers,
+        stub_khonshu_response,
+        stub_khonshu_response_failure,
+        stub_device_info,
+    )
+    from func.src.domain.exceptions.repositories.exception import ErrorOnUpdateUser
+    from func.src.domain.exceptions.services.exception import (
+        ErrorCalculatingCustomerSuitability,
+    )
+    from func.src.domain.exceptions.transports.exception import (
+        InvalidOnboardingCurrentStep,
+    )
+    from func.src.services.suitability import SuitabilityService
+
+
+@mock.patch(
     "func.src.services.suitability.UserRepository.update_customer_suitability_data",
     return_value=StubPymongoResults(),
 )
@@ -34,7 +47,7 @@ async def test_when_update_customer_suitability_fail_then_raises(mock_update_one
         )
 
 
-@patch(
+@mock.patch(
     "func.src.services.suitability.UserRepository.update_customer_suitability_data",
     return_value=StubPymongoResults(True),
 )
@@ -50,7 +63,7 @@ async def test_when_update_customer_suitability_with_success_then_mock_was_calle
     )
 
 
-@patch(
+@mock.patch(
     "func.src.services.suitability.UserRepository.update_customer_suitability_data",
     return_value=StubPymongoResults(True),
 )
@@ -68,7 +81,7 @@ async def test_when_update_customer_suitability_with_success_then_return_true(
     assert result is True
 
 
-@patch(
+@mock.patch(
     "func.src.services.suitability.Khonshu.get_suitability_score",
     return_value=stub_khonshu_response,
 )
@@ -83,7 +96,7 @@ async def test_when_get_customer_suitability_response_from_khonshu_with_success_
     assert isinstance(customer_suitability, CustomerSuitability)
 
 
-@patch(
+@mock.patch(
     "func.src.services.suitability.Khonshu.get_suitability_score",
     return_value=stub_khonshu_response,
 )
@@ -100,7 +113,7 @@ async def test_when_get_customer_suitability_response_from_khonshu_with_success_
     assert customer_suitability.version == 13
 
 
-@patch(
+@mock.patch(
     "func.src.services.suitability.Khonshu.get_suitability_score",
     return_value=stub_khonshu_response_failure,
 )
@@ -114,11 +127,11 @@ async def test_when_get_customer_suitability_from_khonshu_is_not_success_then_ra
         )
 
 
-@patch(
+@mock.patch(
     "func.src.services.suitability.SuitabilityService._SuitabilityService__save_customer_suitability_data"
 )
-@patch("func.src.services.suitability.Audit.record_message_log")
-@patch(
+@mock.patch("func.src.services.suitability.Audit.record_message_log")
+@mock.patch(
     "func.src.services.suitability.Khonshu.get_suitability_score",
     return_value=stub_khonshu_response,
 )
@@ -127,14 +140,16 @@ async def test_when_create_suitability_with_success_then_return_true(
     mock_khonshu_response, mock_audit_response, mock_save_suitability
 ):
     result = await SuitabilityService.set_in_customer(
-        unique_id=stub_unique_id, customer_answers=stub_customer_answers
+        unique_id=stub_unique_id,
+        customer_answers=stub_customer_answers,
+        device_info=stub_device_info,
     )
 
     assert result is True
 
 
 @pytest.mark.asyncio
-@patch(
+@mock.patch(
     "func.src.services.suitability.OnboardingSteps.get_user_current_step",
     return_value="suitability",
 )
@@ -145,7 +160,7 @@ async def test_when_current_step_correct_then_return_true(mock_onboarding_steps)
 
 
 @pytest.mark.asyncio
-@patch(
+@mock.patch(
     "func.src.services.suitability.OnboardingSteps.get_user_current_step",
     return_value="finished",
 )

@@ -3,7 +3,7 @@ from datetime import datetime
 from khonshu import CustomerAnswers, CustomerSuitability
 from pytz import timezone
 
-from src.domain.models.device_info import DeviceInfo
+from ..models.device_info import DeviceInfo
 
 
 class SuitabilityModel:
