@@ -5,17 +5,17 @@ from flask import request, Response
 from khonshu import CustomerAnswers
 from pydantic import ValidationError
 
-from src.domain.exceptions.base.base_exceptions import (
+from func.src.domain.exceptions.base.base_exceptions import (
     ServiceException,
     RepositoryException,
     TransportException,
     DomainException,
     InternalCode,
 )
-from src.domain.response.model import ResponseModel
-from src.services.jwt import JwtService
-from src.services.suitability import SuitabilityService
-from src.transports.device_info.transport import DeviceSecurity
+from func.src.domain.response.model import ResponseModel
+from func.src.services.jwt import JwtService
+from func.src.services.suitability import SuitabilityService
+from func.src.transports.device_info.transport import DeviceSecurity
 
 
 async def create_suitability_profile() -> Response:
